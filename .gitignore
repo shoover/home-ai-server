@@ -1,0 +1,6 @@
+# Includes AWS creds
+/.env
+
+/certs
+
+/config.json

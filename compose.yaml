@@ -1,0 +1,60 @@
+services:
+  # Expose the app on the LAN via https. If you don't need SSL, you can remove
+  # this and connect to open-webui via http://localhost:3000.
+  nginx:
+    image: nginx:latest
+    ports:
+      - "3443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/cert.pem:/etc/nginx/cert.pem:ro
+      - ./certs/key.pem:/etc/nginx/key.pem:ro
+    restart: unless-stopped
+
+  # Standard open-webui (without embedded ollama). All it needs is a volume to
+  # store the database.
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      # Expose the app on localhost via plain HTTP for debugging. Change to
+      # 0.0.0.0 to expose plain HTTP on the LAN.
+      - "127.0.0.1:3000:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    restart: unless-stopped
+
+  # Bedrock Access Gateway serves Bedrock chat models
+  bedrock-gateway:
+    build:
+      context: ./bedrock-access-gateway/src
+      dockerfile: ./Dockerfile_ecs
+    ports:
+      # Expose the API on localhost for testing and local use. Don't open to the
+      # web or LAN without overriding the default access token.
+      - "127.0.0.1:4000:80"
+    environment:
+      # AWS config is loaded from .env
+      AWS_ACCESS_KEY_ID: "${OPENWEBUI_AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${OPENWEBUI_AWS_SECRET_ACCESS_KEY}"
+      AWS_REGION: "${OPENWEBUI_AWS_REGION}"
+      DEBUG: false
+    restart: unless-stopped
+
+  # LiteLLM serves the Bedrock embedding model
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    command: ["--port", "4100", "--config", "/app/config.yaml"] #, "--detailed_debug"]
+    ports:
+      # Expose the API on localhost for testing and local use. Don't open to the
+      # web or LAN without overriding the hardcoded access token.
+      - "127.0.0.1:4100:80"
+    volumes:
+      - ./litellm.yaml:/app/config.yaml:ro
+    environment:
+      AWS_ACCESS_KEY_ID: "${OPENWEBUI_AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${OPENWEBUI_AWS_SECRET_ACCESS_KEY}"
+      AWS_REGION_NAME: "${OPENWEBUI_AWS_REGION}"
+    restart: unless-stopped
+
+volumes:
+  open-webui:
