@@ -1,6 +1,9 @@
-Home AI server
+#+title: Home AI server
 
-Goals:
+For more on this project's motivation and a setup guide, see the blog post:
+https://shawnhoover.dev/notes/home-ai-server.html.
+
+* Goals
 - Easy-to-use, fully featured AI chat interface
 - Access to one or more frontier models
 - Multi-user
@@ -8,14 +11,14 @@ Goals:
 - Pay as you go for all LLM interactions
 - Installable on mobile as a progressive web app
 
-Implementation:
+* Implementation
 - open-webui running in docker-compose
 - Backed by AWS Bedrock foundation models and local ollama
 - bedrock-access-gateway to access Bedrock chat models
 - litellm API adapter to access a Bedrock embedding model
 - nginx SSL termination with self-signed cert
 
-TODO
+* TODO
 - [ ] Move deploy script to a CloudFormation stack
 - [ ] Mount open-webui config.json
 - [ ] Move secrets volumes to docker compose secrets
@@ -24,11 +27,9 @@ TODO
 - [X] Document/automate checking out bedrock-access-gateway
 - [X] Prefix AWS environment variables in .env
 
-
 * Setup
-
 When cloning this repo, you'll need to pull submodules to get Bedrock Access Gateway:
 
 #+begin_src sh
-git clone --recurse-submodules
+git clone --recurse-submodules https://github.com/shoover/home-ai-server.git
 #+end_src
