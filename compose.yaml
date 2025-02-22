@@ -3,6 +3,8 @@ services:
   # this and connect to open-webui via http://localhost:3000.
   nginx:
     image: nginx:latest
+    depends_on:
+      - open-webui
     ports:
       - "3443:443"
     volumes:
@@ -15,6 +17,9 @@ services:
   # store the database.
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
+    depends_on:
+      - bedrock-gateway
+      - litellm
     ports:
       # Expose the app on localhost via plain HTTP for debugging. Change to
       # 0.0.0.0 to expose plain HTTP on the LAN.
