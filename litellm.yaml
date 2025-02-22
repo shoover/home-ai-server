@@ -3,10 +3,7 @@ model_list:
     litellm_params:
       model: "bedrock/amazon.titan-embed-text-v2:0"
 
-  - model_name: bedrock/*
-    litellm_params:
-      model: "bedrock/*"
+  # - model_name: bedrock/*
+  #   litellm_params:
+  #     model: bedrock/*
 
-general_settings:
-  # Note the hardcoded API key. Firewall the litellm server port accordingly.
-  master_key: my-litellm

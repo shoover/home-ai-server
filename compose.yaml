@@ -21,7 +21,7 @@ services:
       - bedrock-gateway
       - litellm
     ports:
-      # Expose the app on localhost via plain HTTP for debugging. Change to
+      # Expose the app on localhost:3000 via plain HTTP for debugging. Change to
       # 0.0.0.0 to expose plain HTTP on the LAN.
       - "127.0.0.1:3000:8080"
     volumes:
@@ -50,15 +50,15 @@ services:
     image: ghcr.io/berriai/litellm:main-latest
     command: ["--port", "4100", "--config", "/app/config.yaml"] #, "--detailed_debug"]
     ports:
-      # Expose the API on localhost for testing and local use. Don't open to the
-      # web or LAN without overriding the hardcoded access token.
-      - "127.0.0.1:4100:80"
+      # Expose the API on localhost:4100 for testing and local use.
+      - "127.0.0.1:4100:4100"
     volumes:
       - ./litellm.yaml:/app/config.yaml:ro
     environment:
       AWS_ACCESS_KEY_ID: "${OPENWEBUI_AWS_ACCESS_KEY_ID}"
       AWS_SECRET_ACCESS_KEY: "${OPENWEBUI_AWS_SECRET_ACCESS_KEY}"
       AWS_REGION_NAME: "${OPENWEBUI_AWS_REGION}"
+      LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
     restart: unless-stopped
 
 volumes:
