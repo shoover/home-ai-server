@@ -33,3 +33,14 @@ When cloning this repo, you'll need to pull submodules to get Bedrock Access Gat
 #+begin_src sh
 git clone --recurse-submodules https://github.com/shoover/home-ai-server.git
 #+end_src
+
+** Create certs
+#+begin_src sh
+mkdir -p certs
+
+openssl req \
+  -x509 -nodes -days 365 -newkey rsa:2048 \
+  -subj "/CN=YOUR-COMPUTERNAME.local" \
+  -keyout certs/key.pem \
+  -out certs/cert.pem
+#+end_src
