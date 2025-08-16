@@ -44,3 +44,10 @@ openssl req \
   -keyout certs/key.pem \
   -out certs/cert.pem
 #+end_src
+
+** Update submodules
+#+begin_src sh
+git submodule update --remote bedrock-access-gateway
+git add bedrock-access-gateway
+git commit -m "Bump submodules"
+#+end_src
