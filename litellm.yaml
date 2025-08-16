@@ -3,7 +3,14 @@ model_list:
     litellm_params:
       model: "bedrock/amazon.titan-embed-text-v2:0"
 
+  - model_name: anthropic/*
+    litellm_params:
+      model: anthropic/*
+      api_key: "os.environ/ANTHROPIC_API_KEY"
+
+  # LiteLLM can serve Bedrock models, but you probably want to enable specific
+  # ones. The wildcard causes all models available in all regions to be listed
+  # in the app, including those you haven't enabled in AWS.
   # - model_name: bedrock/*
   #   litellm_params:
   #     model: bedrock/*
-

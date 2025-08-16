@@ -59,7 +59,8 @@ services:
       DEBUG: false
     restart: unless-stopped
 
-  # LiteLLM serves the Bedrock embedding model
+  # LiteLLM serves the Bedrock embedding model and providers that don't
+  # have native openai-compatible completion APIs.
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
     command: ["--port", "4100", "--config", "/app/config.yaml"] #, "--detailed_debug"]
@@ -72,6 +73,9 @@ services:
       AWS_ACCESS_KEY_ID: "${OPENWEBUI_AWS_ACCESS_KEY_ID}"
       AWS_SECRET_ACCESS_KEY: "${OPENWEBUI_AWS_SECRET_ACCESS_KEY}"
       AWS_REGION_NAME: "${OPENWEBUI_AWS_REGION}"
+      
+      ANTHROPIC_API_KEY: "${OPENWEBUI_ANTHROPIC_API_KEY}"
+      
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
     restart: unless-stopped
 
