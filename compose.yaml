@@ -5,15 +5,14 @@ services:
     image: nginx:latest
     depends_on:
       - open-webui
+    restart: unless-stopped
     ports:
       - "3443:443"  # OpenWebUI
       - "3080:8080" # nginx status
-      
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs/cert.pem:/etc/nginx/cert.pem:ro
       - ./certs/key.pem:/etc/nginx/key.pem:ro
-    restart: unless-stopped
 
   # Standard open-webui (without embedded ollama). All it needs is a volume to
   # store the database.
@@ -22,13 +21,13 @@ services:
     depends_on:
       - bedrock-gateway
       - litellm
+    restart: unless-stopped
     ports:
       # Expose the app on localhost:3000 via plain HTTP for debugging. Change to
       # 0.0.0.0 to expose plain HTTP on the LAN.
       - "127.0.0.1:3000:8080"
     volumes:
       - open-webui:/app/backend/data
-    restart: unless-stopped
     environment:
       # Providing a stable key should preserve login sessions across container updates
       - WEBUI_SECRET_KEY="${WEBUI_SECRET_KEY}"
@@ -36,17 +35,19 @@ services:
   # Auto-update OpenWebUI
   watchtower:
     image: containrrr/watchtower
+    depends_on:
+      - open-webui
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 900 open-webui
-    depends_on:
-      - open-webui
 
   # Bedrock Access Gateway serves Bedrock chat models
   bedrock-gateway:
     build:
       context: ./bedrock-access-gateway/src
       dockerfile: ./Dockerfile_ecs
+    restart: unless-stopped
     ports:
       # Expose the API on localhost for testing and local use. Don't open to the
       # web or LAN without overriding the default access token.
@@ -57,13 +58,12 @@ services:
       AWS_SECRET_ACCESS_KEY: "${OPENWEBUI_AWS_SECRET_ACCESS_KEY}"
       AWS_REGION: "${OPENWEBUI_AWS_REGION}"
       DEBUG: false
-    restart: unless-stopped
 
   # LiteLLM serves the Bedrock embedding model and providers that don't
   # have native openai-compatible completion APIs.
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
-    command: ["--port", "4100", "--config", "/app/config.yaml"] #, "--detailed_debug"]
+    restart: unless-stopped
     ports:
       # Expose the API on localhost:4100 for testing and local use.
       - "127.0.0.1:4100:4100"
@@ -77,7 +77,7 @@ services:
       ANTHROPIC_API_KEY: "${OPENWEBUI_ANTHROPIC_API_KEY}"
       
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
-    restart: unless-stopped
+    command: ["--port", "4100", "--config", "/app/config.yaml"] #, "--detailed_debug"]
 
 volumes:
   open-webui:
