@@ -1,7 +1,9 @@
+name: home-ai-server
 services:
   # Expose the app on the LAN via https. If you don't need SSL, you can remove
   # this and connect to open-webui via http://localhost:3000.
   nginx:
+    container_name: home-ai-server-nginx
     image: nginx:latest
     depends_on:
       - open-webui
@@ -17,6 +19,7 @@ services:
   # Standard open-webui (without embedded ollama). All it needs is a volume to
   # store the database.
   open-webui:
+    container_name: home-ai-server-open-webui
     image: ghcr.io/open-webui/open-webui:main
     depends_on:
       - bedrock-gateway
@@ -31,16 +34,6 @@ services:
     environment:
       # Providing a stable key should preserve login sessions across container updates
       - WEBUI_SECRET_KEY="${WEBUI_SECRET_KEY}"
-
-  # Auto-update OpenWebUI
-  watchtower:
-    image: containrrr/watchtower
-    depends_on:
-      - open-webui
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 900 open-webui
 
   # Bedrock Access Gateway serves Bedrock chat models
   bedrock-gateway:
@@ -60,8 +53,9 @@ services:
       DEBUG: false
 
   # LiteLLM serves the Bedrock embedding model and providers that don't
-  # have native openai-compatible completion APIs.
+  # serve openai-compatible completion APIs, e.g. Anthropic.
   litellm:
+    container_name: home-ai-server-litellm
     image: ghcr.io/berriai/litellm:main-latest
     restart: unless-stopped
     ports:
@@ -75,9 +69,19 @@ services:
       AWS_REGION_NAME: "${OPENWEBUI_AWS_REGION}"
       
       ANTHROPIC_API_KEY: "${OPENWEBUI_ANTHROPIC_API_KEY}"
-      
+
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
     command: ["--port", "4100", "--config", "/app/config.yaml"] #, "--detailed_debug"]
+
+  # Auto-update public base images in this project
+  watchtower:
+    image: containrrr/watchtower
+    depends_on:
+      - open-webui
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 900 home-ai-server-nginx home-ai-server-open-webui home-ai-server-litellm
 
 volumes:
   open-webui:
