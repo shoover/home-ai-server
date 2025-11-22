@@ -30,7 +30,7 @@ services:
       # 0.0.0.0 to expose plain HTTP on the LAN.
       - "127.0.0.1:3000:8080"
     volumes:
-      - open-webui:/app/backend/data
+      - ./open-webui:/app/backend/data
     environment:
       # Providing a stable key should preserve login sessions across container updates
       - WEBUI_SECRET_KEY="${WEBUI_SECRET_KEY}"
