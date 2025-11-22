@@ -1,8 +1,5 @@
 #+title: Home AI server
 
-For more on this project's motivation and a setup guide, see the blog post:
-https://shawnhoover.dev/notes/home-ai-server.html.
-
 * Goals
 - Easy-to-use, fully featured AI chat interface
 - Access to one or more frontier models
@@ -11,24 +8,32 @@ https://shawnhoover.dev/notes/home-ai-server.html.
 - Pay as you go for all LLM interactions
 - Installable on mobile as a progressive web app
 
+For more on this project's motivation and a setup guide, see the blog post:
+https://shawnhoover.dev/notes/home-ai-server.html.
+
 * Implementation
 - open-webui running in docker-compose
-- Backed by AWS Bedrock foundation models and local ollama
+- Backed by AWS Bedrock foundation models, local ollama, and any
+  openai-compatible providers you connect
 - bedrock-access-gateway to access Bedrock chat models
-- litellm API adapter to access a Bedrock embedding model
+- litellm API adapter to access Anthropic models and Bedrock embeddings
 - nginx SSL termination with self-signed cert
 
+** Backup
+- Database: It's in the bind mount volume, available to local machine backup services.
+- config.json: TBD. Meanwhile you have to remember to download it from the admin
+  panel.
+
 * TODO
-- [ ] Move deploy script to a CloudFormation stack
-- [ ] Mount open-webui config.json
+- [ ] Create open-webui config.json backup strategy
 - [ ] Move secrets volumes to docker compose secrets
-- [ ] Create backup strategy
-- [ ] Set up auto-update
+- [X] Create DB backup strategy
+- [X] Set up auto-update
 - [X] Document/automate checking out bedrock-access-gateway
 - [X] Prefix AWS environment variables in .env
 
 * Setup
-When cloning this repo, you'll need to pull submodules to get Bedrock Access Gateway:
+Clone and pull submodules to get Bedrock Access Gateway:
 
 #+begin_src sh
 git clone --recurse-submodules https://github.com/shoover/home-ai-server.git
@@ -44,6 +49,9 @@ openssl req \
   -keyout certs/key.pem \
   -out certs/cert.pem
 #+end_src
+
+** Set up Open WebUI
+See https://shawnhoover.dev/notes/home-ai-server.html.
 
 ** Update submodules
 #+begin_src sh
