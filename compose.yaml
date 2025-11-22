@@ -82,6 +82,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 900 home-ai-server-nginx home-ai-server-open-webui home-ai-server-litellm
+    environment:
+      DOCKER_API_VERSION: "1.52"
 
 volumes:
   open-webui:
