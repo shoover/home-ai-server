@@ -4,7 +4,7 @@
 - Easy-to-use, fully featured AI chat interface
 - Access to one or more frontier models
 - Multi-user
-- Accessible on LAN only
+- Accessible on LAN or VPN only
 - Pay as you go for all LLM interactions
 - Installable on mobile as a progressive web app
 
@@ -18,6 +18,8 @@ https://shawnhoover.dev/notes/home-ai-server.html.
 - bedrock-access-gateway to access Bedrock chat models
 - litellm API adapter to access Anthropic models and Bedrock embeddings
 - nginx SSL termination with self-signed cert
+- Tailscale node--supports mobile PWA via both http://home-ai and
+  https://home-ai.TAILNET_ID.ts.net
 
 ** Backup
 - Database: It's in the bind mount volume, available to local machine backup services.
@@ -39,6 +41,19 @@ Clone and pull submodules to get Bedrock Access Gateway:
 git clone --recurse-submodules https://github.com/shoover/home-ai-server.git
 #+end_src
 
+** Tailscale
+Go to https://login.tailscale.com/admin/settings/keys and generate an auth key.
+Leave Resusable unchecked. The compose config works with a single use auth key and
+and restarts using state in the Caddy state volume.
+
+Check Tags and choose a tag, e.g. "web server". This disables node key expiry for the
+device.
+
+Save the auth key in .env.
+
+** Create secrets
+Copy .env.tmpl to .env and fill in your keys.
+
 ** Create certs
 #+begin_src sh
 mkdir -p certs
@@ -51,7 +66,14 @@ openssl req \
 #+end_src
 
 ** Set up Open WebUI
-See https://shawnhoover.dev/notes/home-ai-server.html.
+See https://shawnhoover.dev/notes/home-ai-server.html for steps to:
+- Configure AWS Bedrock and an IAM user.
+- Set up connections in Open WebUI.
+
+** Start the server
+#+begin_src sh
+scripts/update.sh
+#+end_src
 
 ** Update submodules
 #+begin_src sh

@@ -7,3 +7,6 @@
 
 # Open WebUI bind mount for backing up the database
 /open-webui
+
+# Tailscale state
+/tailscale

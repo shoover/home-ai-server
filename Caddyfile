@@ -1,0 +1,25 @@
+# Serve Open WebUI as a Tailscale web server node.
+# Allow plain HTTP with the short node name as a convenience. Tailscale's
+# automatic certificate creation only works with at least one dot in the name.
+
+{
+	tailscale {
+		state_dir /tailscale
+	}
+
+	log tailscale {
+		level INFO
+	}
+}
+
+http://home-ai:80, https://home-ai.{$TAILNET_ID}.ts.net:443 {
+	bind tailscale/home-ai
+    tailscale_auth
+
+	reverse_proxy open-webui:8080 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

@@ -9,7 +9,7 @@ services:
       - open-webui
     restart: unless-stopped
     ports:
-      - "3443:443"  # OpenWebUI
+      - "3443:443" # OpenWebUI
       - "3080:8080" # nginx status
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -67,7 +67,7 @@ services:
       AWS_ACCESS_KEY_ID: "${OPENWEBUI_AWS_ACCESS_KEY_ID}"
       AWS_SECRET_ACCESS_KEY: "${OPENWEBUI_AWS_SECRET_ACCESS_KEY}"
       AWS_REGION_NAME: "${OPENWEBUI_AWS_REGION}"
-      
+
       ANTHROPIC_API_KEY: "${OPENWEBUI_ANTHROPIC_API_KEY}"
 
       LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY}"
@@ -78,12 +78,49 @@ services:
     image: containrrr/watchtower
     depends_on:
       - open-webui
+      - caddy
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 900 home-ai-server-nginx home-ai-server-open-webui home-ai-server-litellm
+    command: --interval 900 home-ai-server-nginx home-ai-server-open-webui home-ai-server-litellm home-ai-server-caddy
     environment:
       DOCKER_API_VERSION: "1.52"
 
+  # Tailscale web server node via Caddy sidecar with Tailscale extension
+  caddy:
+    container_name: home-ai-server-caddy
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM caddy:2-builder-alpine AS builder
+        RUN xcaddy build \
+          --with github.com/tailscale/caddy-tailscale@main
+
+        FROM caddy:2-alpine
+        COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+
+        RUN apk --no-cache add mailcap
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./tailscale:/tailscale
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - TAILNET_ID=${CADDY_TAILNET_ID}
+      - TS_AUTHKEY=${CADDY_TS_AUTHKEY}
+      - TS_AUTH_ONCE=true
+    restart: unless-stopped
+    depends_on:
+      - open-webui
+    healthcheck:
+      test:
+        ["CMD", "wget", "--quiet", "--tries=1", "--spider", "https://localhost:443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 volumes:
   open-webui:
+  caddy_data:
+  caddy_config:
