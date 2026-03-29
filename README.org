@@ -17,9 +17,9 @@ https://shawnhoover.dev/notes/home-ai-server.html.
   openai-compatible providers you connect
 - bedrock-access-gateway to access Bedrock chat models
 - litellm API adapter to access Anthropic models and Bedrock embeddings
-- nginx SSL termination with self-signed cert
-- Tailscale node--supports mobile PWA via both http://home-ai and
-  https://home-ai.TAILNET_ID.ts.net
+- Caddy reverse proxy with Tailscale
+- Tailscale reverse proxy via Caddy. This supports mobile PWA via both http://home-ai and
+  https://home-ai.TAILNET_ID.ts.net.
 
 ** Backup
 - Database: It's in the bind mount volume, available to local machine backup services.
@@ -54,16 +54,7 @@ Save the auth key in .env.
 ** Create secrets
 Copy .env.tmpl to .env and fill in your keys.
 
-** Create certs
-#+begin_src sh
-mkdir -p certs
 
-openssl req \
-  -x509 -nodes -days 365 -newkey rsa:2048 \
-  -subj "/CN=YOUR-COMPUTERNAME.local" \
-  -keyout certs/key.pem \
-  -out certs/cert.pem
-#+end_src
 
 ** Set up Open WebUI
 See https://shawnhoover.dev/notes/home-ai-server.html for steps to:

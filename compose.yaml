@@ -1,21 +1,5 @@
 name: home-ai-server
 services:
-  # Expose the app on the LAN via https. If you don't need SSL, you can remove
-  # this and connect to open-webui via http://localhost:3000.
-  nginx:
-    container_name: home-ai-server-nginx
-    image: nginx:latest
-    depends_on:
-      - open-webui
-    restart: unless-stopped
-    ports:
-      - "3443:443" # OpenWebUI
-      - "3080:8080" # nginx status
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs/cert.pem:/etc/nginx/cert.pem:ro
-      - ./certs/key.pem:/etc/nginx/key.pem:ro
-
   # Standard open-webui (without embedded ollama). All it needs is a volume to
   # store the database.
   open-webui:
@@ -82,7 +66,7 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 900 home-ai-server-nginx home-ai-server-open-webui home-ai-server-litellm home-ai-server-caddy
+    command: --interval 900 home-ai-server-open-webui home-ai-server-litellm home-ai-server-caddy
     environment:
       DOCKER_API_VERSION: "1.52"
 
