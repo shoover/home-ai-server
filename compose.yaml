@@ -12,14 +12,15 @@ services:
     ports:
       # Expose the app on localhost:3000 via plain HTTP for debugging. Change to
       # 0.0.0.0 to expose plain HTTP on the LAN.
-      - "127.0.0.1:3000:8080"
+      - "0.0.0.0:3000:8080"
     volumes:
       - ./open-webui:/app/backend/data
     environment:
       # Providing a stable key should preserve login sessions across container updates
       - WEBUI_SECRET_KEY="${WEBUI_SECRET_KEY}"
 
-  # Bedrock Access Gateway serves Bedrock chat models
+  # Bedrock Access Gateway serves Bedrock chat models.
+  # See tradeoffs between BAG, litellm, AWS Bedrock Mantle: https://docs.openwebui.com/getting-started/quick-start/connect-a-provider/starting-with-openai-compatible/#cloud-providers
   bedrock-gateway:
     build:
       context: ./bedrock-access-gateway/src
